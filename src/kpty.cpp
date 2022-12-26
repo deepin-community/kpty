@@ -59,6 +59,17 @@
 class UtemptProcess : public QProcess
 {
 public:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    UtemptProcess()
+    {
+        setChildProcessModifier([this]() {
+            // These are the file descriptors the utempter helper wants
+            dup2(cmdFd, 0);
+            dup2(cmdFd, 1);
+            dup2(cmdFd, 3);
+        });
+    }
+#else
     void setupChildProcess() override
     {
         // These are the file descriptors the utempter helper wants
@@ -66,6 +77,8 @@ public:
         dup2(cmdFd, 1);
         dup2(cmdFd, 3);
     }
+#endif
+
     int cmdFd;
 };
 #else
@@ -118,8 +131,6 @@ extern "C" {
 
 #include <qplatformdefs.h>
 
-#include <Q_PID>
-
 #define TTY_GROUP "tty"
 
 #ifndef PATH_MAX
@@ -156,7 +167,7 @@ KPtyPrivate::~KPtyPrivate()
 #if !HAVE_OPENPTY
 bool KPtyPrivate::chownpty(bool grant)
 {
-    return !QProcess::execute(QFile::decodeName(CMAKE_INSTALL_PREFIX "/" KDE_INSTALL_LIBEXECDIR_KF5 "/kgrantpty"),
+    return !QProcess::execute(QFile::decodeName(CMAKE_INSTALL_PREFIX "/" KDE_INSTALL_LIBEXECDIR_KF "/kgrantpty"),
                               QStringList() << (grant ? "--grant" : "--revoke") << QString::number(masterFd));
 }
 #endif

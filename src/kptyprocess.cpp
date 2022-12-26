@@ -10,7 +10,6 @@
 #include <kptydevice.h>
 #include <kuser.h>
 
-#include <memory>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -40,6 +39,24 @@ KPtyProcess::KPtyProcess(int ptyMasterFd, QObject *parent)
     , d_ptr(new KPtyProcessPrivate)
 {
     Q_D(KPtyProcess);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    setChildProcessModifier([d]() {
+        d->pty->setCTty();
+        if (d->addUtmp) {
+            d->pty->login(KUser(KUser::UseRealUserID).loginName().toLocal8Bit().constData(), qgetenv("DISPLAY").constData());
+        }
+        if (d->ptyChannels & StdinChannel) {
+            dup2(d->pty->slaveFd(), 0);
+        }
+        if (d->ptyChannels & StdoutChannel) {
+            dup2(d->pty->slaveFd(), 1);
+        }
+        if (d->ptyChannels & StderrChannel) {
+            dup2(d->pty->slaveFd(), 2);
+        }
+    });
+#endif
 
     d->pty = std::make_unique<KPtyDevice>(this);
 
@@ -101,6 +118,7 @@ KPtyDevice *KPtyProcess::pty() const
     return d->pty.get();
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 void KPtyProcess::setupChildProcess()
 {
     Q_D(KPtyProcess);
@@ -121,5 +139,6 @@ void KPtyProcess::setupChildProcess()
 
     KProcess::setupChildProcess();
 }
+#endif
 
 #include "moc_kptyprocess.cpp"
