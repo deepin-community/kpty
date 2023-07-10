@@ -1,4 +1,3 @@
-/usr/include/KF5/kpty_version.h
 usr/include/KF5/KPty/
 usr/lib/*/cmake/KF5Pty/
 usr/lib/*/libKF5Pty.so
