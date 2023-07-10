@@ -1,22 +1,32 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(KF_VERSION "5.90.0") # handled by release scripts
-set(KF_DEP_VERSION "5.90.0") # handled by release scripts
+set(KF_VERSION "5.103.0") # handled by release scripts
+set(KF_DEP_VERSION "5.103.0") # handled by release scripts
 project(KPty VERSION ${KF_VERSION})
 
 include(FeatureSummary)
-find_package(ECM 5.90.0  NO_MODULE)
+find_package(ECM 5.103.0  NO_MODULE)
 set_package_properties(ECM PROPERTIES TYPE REQUIRED DESCRIPTION "Extra CMake Modules." URL "https://commits.kde.org/extra-cmake-modules")
 feature_summary(WHAT REQUIRED_PACKAGES_NOT_FOUND FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-set(REQUIRED_QT_VERSION 5.15.2)
-
+# Includes
 include(KDEInstallDirs)
-include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(KDECMakeSettings)
+include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
+
 include(KDEGitCommitHooks)
+include(ECMMarkNonGuiExecutable)
+include(ECMSetupVersion)
+include(ECMGenerateHeaders)
+include(ECMQtDeclareLoggingCategory)
+include(ECMDeprecationSettings)
+include(ECMAddQch)
+include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
+
+set(REQUIRED_QT_VERSION 5.15.2)
 find_package(Qt${QT_MAJOR_VERSION} "${REQUIRED_QT_VERSION}" CONFIG REQUIRED Core)
 
 find_package(KF5CoreAddons ${KF_DEP_VERSION} REQUIRED)
@@ -35,16 +45,6 @@ endif()
 # create a Config.cmake and a ConfigVersion.cmake file and install them
 set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/KF5Pty")
 
-# Includes
-
-include(GenerateExportHeader)
-include(ECMMarkNonGuiExecutable)
-include(ECMSetupVersion)
-include(ECMGenerateHeaders)
-include(ECMQtDeclareLoggingCategory)
-include(CMakePackageConfigHelpers)
-include(ECMAddQch)
-
 option(BUILD_QCH "Build API documentation in QCH format (for e.g. Qt Assistant, Qt Creator & KDevelop)" OFF)
 add_feature_info(QCH ${BUILD_QCH} "API documentation in QCH format (for e.g. Qt Assistant, Qt Creator & KDevelop)")
 
@@ -57,8 +57,12 @@ ecm_setup_version(
 
 add_definitions(-DTRANSLATION_DOMAIN=\"kpty5\")
 ki18n_install(po)
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050f02)
-add_definitions(-DKF_DISABLE_DEPRECATED_BEFORE_AND_AT=0x055900)
+
+ecm_set_disabled_deprecation_versions(
+    QT 5.15.2
+    KF 5.97
+)
+
 add_subdirectory( src )
 if (BUILD_TESTING)
     add_subdirectory( autotests )
@@ -91,7 +95,7 @@ install(EXPORT KF5PtyTargets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE KF5Pt
 
 install(FILES
    ${CMAKE_CURRENT_BINARY_DIR}/kpty_version.h
-  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF} COMPONENT Devel
+  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/KPty COMPONENT Devel
 )
 
 feature_summary(WHAT ALL   FATAL_ON_MISSING_REQUIRED_PACKAGES)

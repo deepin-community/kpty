@@ -34,6 +34,8 @@ libKF5Pty.so.5 libkf5pty5 #MINVER#
  _ZN11KPtyProcessD2Ev@Base 4.96.0
  _ZN4KPty10closeSlaveEv@Base 4.96.0
  _ZN4KPty10setWinSizeEii@Base 4.96.0
+ _ZN4KPty10setWinSizeEiiii@Base 5.93.0
+ _ZN4KPty14setCTtyEnabledEb@Base 5.97.0
  _ZN4KPty4openEi@Base 4.96.0
  _ZN4KPty4openEv@Base 4.96.0
  _ZN4KPty5closeEv@Base 4.96.0

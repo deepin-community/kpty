@@ -1,6 +1,7 @@
 /*
     This file is part of the KDE libraries
     SPDX-FileCopyrightText: 2003, 2007 Oswald Buddenhagen <ossi@kde.org>
+    SPDX-FileCopyrightText: 2022 Harald Sitter <sitter@kde.org>
 
     SPDX-License-Identifier: LGPL-2.0-or-later
 */
@@ -88,6 +89,19 @@ public:
     bool openSlave();
 
     /**
+     * @brief Whether this will be a controlling terminal
+     *
+     * This is on by default.
+     * Disabling the controllig aspect only makes sense if another process will
+     * take over control or there is nothing to control or for technical reasons
+     * control cannot be set (this notably is the case with flatpak-spawn when
+     * used inside a sandbox).
+     *
+     * @param enable whether to enable ctty set up
+     */
+    void setCTtyEnabled(bool enable);
+
+    /**
      * Creates a new session and process group and makes this pty the
      * controlling tty.
      */
@@ -138,13 +152,24 @@ public:
 
     /**
      * Change the logical (screen) size of the pty.
-     * The default is 24 lines by 80 columns.
+     * The default is 24 lines by 80 columns in characters, and zero pixels.
      *
      * This function can be used only while the PTY is open.
      *
-     * @param lines the number of rows
-     * @param columns the number of columns
+     * @param lines the number of character rows
+     * @param columns the number of character columns
+     * @param height the view height in pixels
+     * @param width the view width in pixels
      * @return @c true on success, false otherwise
+     *
+     * @since 5.93
+     */
+    bool setWinSize(int lines, int columns, int height, int width);
+
+    /**
+     * @overload
+     * Change the logical (screen) size of the pty.
+     * The pixel size is set to zero.
      */
     bool setWinSize(int lines, int columns);
 
